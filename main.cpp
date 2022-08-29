@@ -22,12 +22,21 @@ class TimSort {
         return n + r;
     }
 
-    static std::unique_ptr<T> insertSort(std::unique_ptr<T> arr ,size_t size)noexcept{
-
+    static void insertSort(std::unique_ptr<T[]> &arr ,size_t size)noexcept{
+        //todo there will be sort algorithm
     }
 
-    static void split(std::unique_ptr<T> &arr ,size_t size, size_t minRun, std::deque< std::pair<size_t, size_t> > &stack){
-        //todo split algorith
+    static void merge(std::unique_ptr<T[]> &arr ,size_t size, std::deque< std::pair<size_t, size_t> > &stack){
+        //todo merge algorithm
+    }
+
+    static void split(std::unique_ptr<T[]> &arr ,size_t size, size_t minRun, std::deque< std::pair<size_t, size_t> > &stack){
+        // while{
+        //todo split algorith to find one minRun
+        //add <startIndex, sizeOfSubArray> into stack
+        //after that check checkIsStackCorrect(stack);
+        //}
+        checkIsStackCorrect(stack);
     }
 
     static void checkIsStackCorrect(std::deque< std::pair<size_t, size_t> > &stack){
@@ -35,20 +44,24 @@ class TimSort {
     }
 
 public:
-    static std::unique_ptr<T> sort(std::unique_ptr<T> arr ,size_t sizeOfArr){
+    static std::unique_ptr<T[]> sort(std::unique_ptr<T[]> arr ,size_t sizeOfArr){
         if(sizeOfArr < 2){
             return arr;
         }
         if(sizeOfArr < 64){// using insertSort
-            return insertSort(std::move(arr), sizeOfArr);
+            insertSort(arr, sizeOfArr);
+            return arr;
         }
 
-        std::deque< std::pair<size_t, size_t>  > stack;
+        std::deque< std::pair<size_t, size_t> > stack;
 
         size_t  minRun  = GetMinrun(sizeOfArr);
 
         split(arr, sizeOfArr, minRun, stack);
 
+        merge(arr, sizeOfArr, stack);
+
+        return arr;
     }
 
 };
@@ -147,7 +160,6 @@ int main() {
     std::size_t sizeOfElem = 10000000;
     auto arr = std::make_unique<int[]>(sizeOfElem);
     auto arrStd = new int[sizeOfElem];
-    auto arrM = new int[sizeOfElem];
     for (size_t i = 0; i < sizeOfElem; ++i) {
         arr[i] = std::rand() % 1000000000;
         arrStd[i] = std::rand() % 1000000000;
@@ -157,7 +169,7 @@ int main() {
     std::clock_t startMerge, startStd;
 
     startMerge = clock();
-//    auto sortedArr = MergeSort(std::move(arr), sizeOfElem);
+    auto sortedArr = TimSort<int>::sort(std::move(arr), sizeOfElem);
     durationMerge = ( std::clock() - startMerge ) / (double) CLOCKS_PER_SEC;
 
     startStd = clock();
