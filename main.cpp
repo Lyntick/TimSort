@@ -22,44 +22,63 @@ class TimSort {
         return n + r;
     }
 
-    static void insertSort(std::unique_ptr<T[]> &arr ,size_t size)noexcept{
-        //todo there will be sort algorithm
+    static void insertSort(std::unique_ptr<T[]> &arr ,size_t left, size_t right)noexcept{//including the right element!
+        for (int i = left + 1; i <= right; i++)
+        {
+            int temp = arr[i];
+            int j = i - 1;
+            while (j >= left && arr[j] > temp)
+            {
+                arr[j+1] = arr[j];
+                j--;
+            }
+            arr[j+1] = temp;
+        }
     }
 
-    static void merge(std::unique_ptr<T[]> &arr ,size_t size, std::deque< std::pair<size_t, size_t> > &stack){
+    static void merge(std::unique_ptr<T[]> &arr ,size_t left, size_t right, std::deque< std::pair<size_t, size_t> > &stack){
         //todo merge algorithm
     }
 
     static void split(std::unique_ptr<T[]> &arr ,size_t size, size_t minRun, std::deque< std::pair<size_t, size_t> > &stack){
-        // while{
-        //todo split algorith to find one minRun
-        //add <startIndex, sizeOfSubArray> into stack
-        //after that check checkIsStackCorrect(stack);
-        //}
-        checkIsStackCorrect(stack);
+        size_t startRun = -1, endRun = -1;
+        for(size_t ptr = 0; ptr < size; ++ptr){
+            startRun = ptr;//first elements of run
+            for(size_t subPtr  = 0; ptr < size && subPtr <= minRun;){//todo think if there is needed operator  < or  <=
+                ++ptr;
+                ++subPtr;
+            }
+            endRun = ptr;
+            insertSort(arr,startRun, endRun);//including endRun
+            stack.emplace_back(std::pair<size_t, size_t>(startRun, endRun));//add to stack
+            checkIsStackCorrect(arr, size, stack);
+        }
+
     }
 
-    static void checkIsStackCorrect(std::deque< std::pair<size_t, size_t> > &stack){
+    static void checkIsStackCorrect(std::unique_ptr<T[]> &arr ,size_t size, std::deque< std::pair<size_t, size_t> > &stack){
         //todo there is condition for checking stack is correct
+
+        merge(arr, 0,0, stack);
     }
 
 public:
     static std::unique_ptr<T[]> sort(std::unique_ptr<T[]> arr ,size_t sizeOfArr){
-        if(sizeOfArr < 2){
+        if(sizeOfArr < 1){
             return arr;
         }
         if(sizeOfArr < 64){// using insertSort
-            insertSort(arr, sizeOfArr);
+            insertSort(arr, 0, sizeOfArr - 1);
             return arr;
         }
 
-        std::deque< std::pair<size_t, size_t> > stack;
+        std::deque< std::pair<size_t, size_t> > stack;//store first elements of the Run  and length of the Run
 
         size_t  minRun  = GetMinrun(sizeOfArr);
 
         split(arr, sizeOfArr, minRun, stack);
 
-        merge(arr, sizeOfArr, stack);
+        merge(arr,0,sizeOfArr,stack);
 
         return arr;
     }
