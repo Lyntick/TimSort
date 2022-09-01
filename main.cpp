@@ -12,6 +12,7 @@
 template<typename T>
 class TimSort {
 
+
     static size_t GetMinrun(int n) noexcept
     {
         int r = 0;//станет 1 если среди сдвинутых битов будет хотя бы 1 ненулевой
@@ -36,21 +37,29 @@ class TimSort {
         }
     }
 
-    static void merge(std::unique_ptr<T[]> &arr ,size_t left, size_t right, std::deque< std::pair<size_t, size_t> > &stack){
+    static void merge(std::unique_ptr<T[]> &arr ,std::deque< std::pair<size_t, size_t> > &stack){
+        //todo merge algorithm
+
+    }
+
+    static void merge(std::unique_ptr<T[]> &arr ,size_t left, size_t right){// including right
         //todo merge algorithm
     }
 
     static void split(std::unique_ptr<T[]> &arr ,size_t size, size_t minRun, std::deque< std::pair<size_t, size_t> > &stack){
-        size_t startRun = -1, endRun = -1;
+        size_t startRun = -1, endRun = -1, lengthOfRun = 0;
         for(size_t ptr = 0; ptr < size; ++ptr){
             startRun = ptr;//first elements of run
-            for(size_t subPtr  = 0; ptr < size && subPtr <= minRun;){//todo think if there is needed operator  < or  <=
+            size_t subPtr  = 0;//counting length
+            while( ptr < (size -1) && subPtr <= minRun){//todo think if there is needed operator  < or  <=
                 ++ptr;
                 ++subPtr;
             }
             endRun = ptr;
-            insertSort(arr,startRun, endRun);//including endRun
-            stack.emplace_back(std::pair<size_t, size_t>(startRun, endRun));//add to stack
+            lengthOfRun = subPtr;
+            if(lengthOfRun != 0)
+                insertSort(arr, startRun, endRun);//including lengthOfRun
+            stack.emplace_back(std::pair<size_t, size_t>(startRun, lengthOfRun));//add to stack
             checkIsStackCorrect(arr, size, stack);
         }
 
@@ -58,8 +67,25 @@ class TimSort {
 
     static void checkIsStackCorrect(std::unique_ptr<T[]> &arr ,size_t size, std::deque< std::pair<size_t, size_t> > &stack){
         //todo there is condition for checking stack is correct
+        if(stack.size() == 1){
+            return;
+        }
 
-        merge(arr, 0,0, stack);
+        for(size_t  iter = stack.size() - 1; iter  >= 0; --iter){
+            if(iter >= 2){//stack has 3 elem or more
+                if(stack[iter].second + stack[iter - 1].second >= stack[iter - 2].second && stack[iter].second >= stack[iter - 1].second){
+                    if(stack[iter].second <= stack[iter -2].second){//merge stack[iter-1] with stack[iter] there is founded min(run)
+                        merge(arr,stack[iter-1].first, stack[iter].first + stack[iter].second);
+                    }else{ //merge stack[iter-1] with stack[iter -2]
+                        merge(arr, stack[iter - 2].first, stack[iter -1 ].first + stack[iter - 1].second);
+                    }
+                }
+            }else if(iter == 1){//stack has 2 elem
+                if(stack[iter].second >= stack[iter - 1].second){
+                    merge(arr, stack[iter - 1].first, stack[iter].first + stack[iter].second);
+                }
+            }
+        }
     }
 
 public:
@@ -78,7 +104,7 @@ public:
 
         split(arr, sizeOfArr, minRun, stack);
 
-        merge(arr,0,sizeOfArr,stack);
+        merge(arr,stack);//merge whole array
 
         return arr;
     }
