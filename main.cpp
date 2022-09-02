@@ -39,7 +39,6 @@ class TimSort {
 
 
     static void merge(std::unique_ptr<T[]> &arr ,std::deque< std::pair<size_t, size_t> > &stack){
-        //todo there is can be a problem
         for(auto iter = stack.rbegin(); iter != stack.rend() - 1; ++iter){
             merge(arr, *iter, *(iter + 1));
         }
@@ -84,7 +83,7 @@ class TimSort {
         for(size_t ptr = 0; ptr < size; ++ptr){
             startRun = ptr;//first elements of run
             size_t subPtr  = 1;//counting length
-            while( ptr < size  && subPtr < minRun){//todo think if there is needed operator  < or  <=
+            while( ptr < size  && subPtr < minRun){
                 ++ptr;
                 ++subPtr;
             }
@@ -99,7 +98,6 @@ class TimSort {
     }
 
     static void checkIsStackCorrect(std::unique_ptr<T[]> &arr ,size_t size, std::deque< std::pair<size_t, size_t> > &stack){
-        //todo there is condition for checking stack is correct
         if(stack.size() == 1){
             return;
         }
@@ -123,32 +121,6 @@ class TimSort {
                 }
             }
         }
-
-//        for(auto iter = stack.begin(); iter  != stack.end(); ++iter){
-//            if(std::distance(iter, stack.end()) >= 2){//stack has 3 elem or more
-//                if(iter->second + (iter+1)->second >= (iter +2)->second && iter->second >= (iter-1)->second){
-//                    if(iter->second <= (iter +2)->second){//merge stack[iter-1] with stack[iter] there is founded min(run)
-//                        merge(arr,*(iter +1), *iter);
-//                        auto tempPair = *iter;
-//                        stack.erase(iter);
-//                        (iter+1)->second = tempPair.first + tempPair.second;
-//                    }else{ //merge stack[iter-1] with stack[iter -2]
-//                        merge(arr, *(iter +2), *(iter +1));
-//
-//                        auto tempPair = *(iter +1);
-//                        stack.erase(iter + 1);
-//                        (iter+1)->second = tempPair.first + tempPair.second;
-//                    }
-//                }
-//            }else if(std::distance(iter, stack.end()) == 1){//stack has 2 elem
-//                if(iter->second >= (iter-1)->second){
-//                    merge(arr,*(iter +1), *iter);
-//                    auto tempPair = *iter;
-//                    stack.erase(iter);
-//                    (iter+1)->second = tempPair.first + tempPair.second;
-//                }
-//            }
-//        }
 
     }
 
@@ -175,17 +147,6 @@ public:
 
 };
 
-
-
-template<typename T>
-bool checkIfSorted(const std::unique_ptr<T[]> arr, std::size_t size) {
-    for (std::size_t i = 0; i < size-1; ++i) {
-        if (arr[i] > arr[i + 1]) {
-            return false;
-        }
-    }
-    return true;
-}
 
 
 
@@ -262,6 +223,16 @@ void mergeSort(int array[], int const begin, int const end)
     merge(array, begin, mid, end);
 }
 
+template<typename T>
+bool checkIfSorted(const std::unique_ptr<T[]> arr, std::size_t size) {
+    for (std::size_t i = 0; i < size-1; ++i) {
+        if (arr[i] >  arr[i + 1]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 int main() {
     std::srand(time(0));
 
@@ -285,7 +256,11 @@ int main() {
     mergeSort(arrStd, 0, sizeOfElem);
     durationStd = ( std::clock() - startStd ) / (double) CLOCKS_PER_SEC;
 
-    std::cout << "DurationStd = " << durationStd << "\nDurationMerge = " << durationMerge << std::endl;
+    for(size_t i = 0; i < sizeOfElem; ++i){
+        std::cout << sortedArr[i] << '\n';
+    }
+
+    std::cout << "\nDurationStd = " << durationStd << "\nDurationTimSort = " << durationMerge << std::endl;
 
     std::cout << checkIfSorted(std::move(sortedArr), sizeOfElem) << std::endl;
 
