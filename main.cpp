@@ -37,21 +37,54 @@ class TimSort {
         }
     }
 
-    static void merge(std::unique_ptr<T[]> &arr ,std::deque< std::pair<size_t, size_t> > &stack){
-        //todo merge algorithm
 
+    static void merge(std::unique_ptr<T[]> &arr ,std::deque< std::pair<size_t, size_t> > &stack){
+        //todo there is can be a problem
+        for(auto iter = stack.rbegin(); iter != stack.rend() - 1; ++iter){
+            merge(arr, *iter, *(iter + 1));
+        }
     }
 
-    static void merge(std::unique_ptr<T[]> &arr ,size_t left, size_t right){// including right
-        //todo merge algorithm
+    static void merge(std::unique_ptr<T[]> &arr ,std::pair<size_t, size_t> &left, std::pair<size_t, size_t> &right){// including right
+
+        auto minArray = std::make_unique<T[]>(left.second);
+        for(size_t i = left.first; i <  left.first + left.second; ++i){
+            minArray[i] = arr[i];
+        }
+
+        size_t leftIndex = 0, rightIndex = right.first, arrIndex = left.first;
+
+        while(leftIndex < left.second && rightIndex <  right.first+right.second){
+            if(minArray[leftIndex] <= arr[rightIndex]){
+                arr[arrIndex] = minArray[leftIndex];
+                ++leftIndex;
+                ++arrIndex;
+            }else{
+                arr[arrIndex] = arr[rightIndex];
+                ++rightIndex;
+                ++arrIndex;
+            }
+        }
+
+        while(leftIndex < left.second){
+            arr[arrIndex] = minArray[leftIndex];
+            ++leftIndex;
+            ++arrIndex;
+        }
+
+        while(rightIndex < right.first+right.second){
+            arr[arrIndex] = arr[rightIndex];
+            ++rightIndex;
+            ++arrIndex;
+        }
     }
 
     static void split(std::unique_ptr<T[]> &arr ,size_t size, size_t minRun, std::deque< std::pair<size_t, size_t> > &stack){
         size_t startRun = -1, endRun = -1, lengthOfRun = 0;
         for(size_t ptr = 0; ptr < size; ++ptr){
             startRun = ptr;//first elements of run
-            size_t subPtr  = 0;//counting length
-            while( ptr < (size -1) && subPtr <= minRun){//todo think if there is needed operator  < or  <=
+            size_t subPtr  = 1;//counting length
+            while( ptr < size  && subPtr < minRun){//todo think if there is needed operator  < or  <=
                 ++ptr;
                 ++subPtr;
             }
@@ -71,21 +104,52 @@ class TimSort {
             return;
         }
 
-        for(size_t  iter = stack.size() - 1; iter  >= 0; --iter){
+        for(int  iter = stack.size() - 1; iter  >= 0; --iter){
             if(iter >= 2){//stack has 3 elem or more
                 if(stack[iter].second + stack[iter - 1].second >= stack[iter - 2].second && stack[iter].second >= stack[iter - 1].second){
                     if(stack[iter].second <= stack[iter -2].second){//merge stack[iter-1] with stack[iter] there is founded min(run)
-                        merge(arr,stack[iter-1].first, stack[iter].first + stack[iter].second);
+                        merge(arr,stack[iter-1], stack[iter]);
+                        //todo delete from stack
                     }else{ //merge stack[iter-1] with stack[iter -2]
-                        merge(arr, stack[iter - 2].first, stack[iter -1 ].first + stack[iter - 1].second);
+                        merge(arr, stack[iter - 2], stack[iter -1]);
                     }
                 }
             }else if(iter == 1){//stack has 2 elem
                 if(stack[iter].second >= stack[iter - 1].second){
-                    merge(arr, stack[iter - 1].first, stack[iter].first + stack[iter].second);
+                    merge(arr, stack[iter - 1], stack[iter]);
+                    auto tempPair = stack[iter];
+                    stack.pop_back();
+                    stack.back().second += tempPair.second;
                 }
             }
         }
+
+//        for(auto iter = stack.begin(); iter  != stack.end(); ++iter){
+//            if(std::distance(iter, stack.end()) >= 2){//stack has 3 elem or more
+//                if(iter->second + (iter+1)->second >= (iter +2)->second && iter->second >= (iter-1)->second){
+//                    if(iter->second <= (iter +2)->second){//merge stack[iter-1] with stack[iter] there is founded min(run)
+//                        merge(arr,*(iter +1), *iter);
+//                        auto tempPair = *iter;
+//                        stack.erase(iter);
+//                        (iter+1)->second = tempPair.first + tempPair.second;
+//                    }else{ //merge stack[iter-1] with stack[iter -2]
+//                        merge(arr, *(iter +2), *(iter +1));
+//
+//                        auto tempPair = *(iter +1);
+//                        stack.erase(iter + 1);
+//                        (iter+1)->second = tempPair.first + tempPair.second;
+//                    }
+//                }
+//            }else if(std::distance(iter, stack.end()) == 1){//stack has 2 elem
+//                if(iter->second >= (iter-1)->second){
+//                    merge(arr,*(iter +1), *iter);
+//                    auto tempPair = *iter;
+//                    stack.erase(iter);
+//                    (iter+1)->second = tempPair.first + tempPair.second;
+//                }
+//            }
+//        }
+
     }
 
 public:
@@ -202,7 +266,7 @@ int main() {
     std::srand(time(0));
 
 
-    std::size_t sizeOfElem = 10000000;
+    std::size_t sizeOfElem = 100;
     auto arr = std::make_unique<int[]>(sizeOfElem);
     auto arrStd = new int[sizeOfElem];
     for (size_t i = 0; i < sizeOfElem; ++i) {
