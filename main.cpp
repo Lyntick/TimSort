@@ -95,7 +95,7 @@ class TimSort {
         for(size_t ptr = 0; ptr < size; ++ptr){
             startRun = ptr;//first elements of run
             size_t subPtr  = 1;//counting length
-            while( ptr < size  && subPtr < minRun){
+            while( ptr < size-1  && subPtr < minRun){
                 ++ptr;
                 ++subPtr;
             }
@@ -255,7 +255,7 @@ int main() {
     std::srand(time(0));
 
 
-    std::size_t sizeOfElem = 1000000;
+    std::size_t sizeOfElem = 59456554;
     auto arr = std::make_unique<int[]>(sizeOfElem);
     auto arrStd = new int[sizeOfElem];
     for (size_t i = 0; i < sizeOfElem; ++i) {
