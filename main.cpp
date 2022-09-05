@@ -255,30 +255,33 @@ int main() {
     std::srand(time(0));
 
 
-    std::size_t sizeOfElem = 59456554;
+    std::size_t sizeOfElem = 1000000;
     auto arr = std::make_unique<int[]>(sizeOfElem);
-    auto arrStd = new int[sizeOfElem];
+    auto arrMerge = new int[sizeOfElem];
+    std::vector<int> arrStd(sizeOfElem);
     for (size_t i = 0; i < sizeOfElem; ++i) {
         arr[i] = std::rand() % 1000000000;
+        arrMerge[i] = std::rand() % 1000000000;
         arrStd[i] = std::rand() % 1000000000;
     }
 
-    double durationMerge, durationStd;
-    std::clock_t startMerge, startStd;
+    double durationTim, durationStd, durationMerge;
+    std::clock_t startTim, startStd, startMerge;
+
+    startTim = clock();
+    auto sortedArr = TimSort<int>::sort(std::move(arr), sizeOfElem);
+    durationTim = (std::clock() - startTim ) / (double) CLOCKS_PER_SEC;
 
     startMerge = clock();
-    auto sortedArr = TimSort<int>::sort(std::move(arr), sizeOfElem);
-    durationMerge = ( std::clock() - startMerge ) / (double) CLOCKS_PER_SEC;
+    mergeSort(arrMerge, 0, sizeOfElem);
+    durationMerge = (std::clock() - startMerge ) / (double) CLOCKS_PER_SEC;
 
     startStd = clock();
-    mergeSort(arrStd, 0, sizeOfElem);
-    durationStd = ( std::clock() - startStd ) / (double) CLOCKS_PER_SEC;
+    std::sort(arrStd.begin(), arrStd.end());
+    durationStd = (std::clock() - startStd ) / (double) CLOCKS_PER_SEC;
 
-//    for(size_t i = 0; i < sizeOfElem; ++i){
-//        std::cout << sortedArr[i] << '\n';
-//    }
-
-    std::cout << "\nDurationStd = " << durationStd << "\nDurationTimSort = " << durationMerge << std::endl;
+    std::cout <<"\nDurationMerge = " << durationMerge << "\nDurationStd = " << durationStd << "\nDurationTimSort = "
+    << durationTim << std::endl;
 
     std::cout << checkIfSorted(std::move(sortedArr), sizeOfElem) << std::endl;
 
